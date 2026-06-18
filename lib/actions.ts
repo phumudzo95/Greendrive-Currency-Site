@@ -1,29 +1,25 @@
-"use server";
-
+// Client-side Supabase insert — works with static export (GitHub Pages)
+import { createClient } from "@supabase/supabase-js";
 import { applicationSchema, generateApplicationNumber } from "@/lib/application-schema";
-import { createServerClient } from "@/lib/supabase";
 
 export type SubmitResult =
   | { success: true; referenceNumber: string }
   | { success: false; error: string };
 
-export async function submitApplication(
-  formData: unknown
-): Promise<SubmitResult> {
-  // 1. Validate on the server regardless of client-side validation
+export async function submitApplication(formData: unknown): Promise<SubmitResult> {
   const parsed = applicationSchema.safeParse(formData);
   if (!parsed.success) {
-    return {
-      success: false,
-      error: "Some fields are invalid. Please check your application and try again.",
-    };
+    return { success: false, error: "Some fields are invalid. Please check and try again." };
   }
 
   const data = parsed.data;
   const referenceNumber = generateApplicationNumber();
 
-  // 2. Persist to Supabase
-  const supabase = createServerClient();
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
   const { error } = await supabase.from("applications").insert({
     reference_number:     referenceNumber,
     full_name:            data.fullName,
@@ -48,11 +44,7 @@ export async function submitApplication(
   });
 
   if (error) {
-    console.error("[submitApplication] Supabase insert error:", error.message);
-    return {
-      success: false,
-      error: "We could not save your application. Please try again or WhatsApp us on 069 656 8639.",
-    };
+    return { success: false, error: "Could not save your application. Please try again or WhatsApp us on 069 656 8639." };
   }
 
   return { success: true, referenceNumber };
