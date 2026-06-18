@@ -12,8 +12,8 @@ import {
   VEHICLE_TYPES,
   USAGE_TYPES,
   APPLICATION_STEPS,
-  generateApplicationNumber,
 } from "@/lib/application-schema";
+import { submitApplication } from "@/lib/actions";
 import { StepIndicator } from "./step-indicator";
 import { Field, TextInput, Select } from "./form-fields";
 
@@ -36,6 +36,8 @@ const DOCUMENT_ITEMS: { key: keyof ApplicationInput; label: string; required: bo
 export function ApplicationForm() {
   const [step, setStep] = useState(0);
   const [submitted, setSubmitted] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const {
     register,
@@ -69,12 +71,16 @@ export function ApplicationForm() {
     setStep((s) => Math.max(s - 1, 0));
   }
 
-  function handleSubmitApplication() {
-    // No backend is connected yet. In production this calls a Server Action
-    // that persists the application to Supabase, uploads documents to
-    // Supabase Storage, and triggers the confirmation email via Resend.
-    const applicationNumber = generateApplicationNumber();
-    setSubmitted(applicationNumber);
+  async function handleSubmitApplication() {
+    setSubmitting(true);
+    setSubmitError(null);
+    const result = await submitApplication(watch());
+    setSubmitting(false);
+    if (result.success) {
+      setSubmitted(result.referenceNumber);
+    } else {
+      setSubmitError(result.error);
+    }
   }
 
   if (submitted) {
@@ -246,32 +252,40 @@ export function ApplicationForm() {
           </div>
         )}
 
-        <div className="mt-8 flex items-center justify-between">
-          <button
-            type="button"
-            onClick={goBack}
-            disabled={step === 0}
-            className="h-11 rounded-lg px-5 text-[14px] font-semibold text-gd-black disabled:opacity-0 disabled:pointer-events-none"
-          >
-            Back
-          </button>
-          {step < APPLICATION_STEPS.length - 1 ? (
-            <button
-              type="button"
-              onClick={goNext}
-              className="h-11 rounded-lg bg-gd-primary px-7 text-[14px] font-bold text-white transition-colors hover:bg-gd-dark"
-            >
-              Continue
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={handleSubmitApplication}
-              className="h-11 rounded-lg bg-gd-primary px-7 text-[14px] font-bold text-white transition-colors hover:bg-gd-dark"
-            >
-              Submit application
-            </button>
+        <div className="mt-8 flex flex-col gap-3">
+          {submitError && (
+            <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-[13px] font-medium text-red-700">
+              {submitError}
+            </div>
           )}
+          <div className="flex items-center justify-between">
+            <button
+              type="button"
+              onClick={goBack}
+              disabled={step === 0}
+              className="h-11 rounded-lg px-5 text-[14px] font-semibold text-gd-black disabled:opacity-0 disabled:pointer-events-none"
+            >
+              Back
+            </button>
+            {step < APPLICATION_STEPS.length - 1 ? (
+              <button
+                type="button"
+                onClick={goNext}
+                className="h-11 rounded-lg bg-gd-primary px-7 text-[14px] font-bold text-white transition-colors hover:bg-gd-dark"
+              >
+                Continue
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleSubmitApplication}
+                disabled={submitting}
+                className="h-11 rounded-lg bg-gd-primary px-7 text-[14px] font-bold text-white transition-colors hover:bg-gd-dark disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {submitting ? "Submitting…" : "Submit application"}
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </div>
