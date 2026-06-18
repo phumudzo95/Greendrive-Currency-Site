@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #111111;
+
+  /* GreenDrive Currency brand tokens */
+  --gd-primary: #0d7a34;
+  --gd-dark: #065f27;
+  --gd-black: #111111;
+  --gd-white: #ffffff;
+  --gd-accent: #34c759;
+  --gd-cream: #fafaf8;
+  --gd-mute: #6b7280;
+  --gd-line: #e7e5e0;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-gd-primary: var(--gd-primary);
+  --color-gd-dark: var(--gd-dark);
+  --color-gd-black: var(--gd-black);
+  --color-gd-white: var(--gd-white);
+  --color-gd-accent: var(--gd-accent);
+  --color-gd-cream: var(--gd-cream);
+  --color-gd-mute: var(--gd-mute);
+  --color-gd-line: var(--gd-line);
+  --font-sans: var(--font-inter);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans), -apple-system, "Segoe UI", sans-serif;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
