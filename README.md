@@ -53,6 +53,21 @@ What exists in this repo today:
 - Tailwind CSS v4 (CSS-first `@theme` tokens in `app/globals.css`)
 - React Hook Form + Zod for the application form
 
+## Deploying to Vercel
+
+1. Go to [vercel.com](https://vercel.com), import the `Greendrive-Currency-Site` GitHub repo.
+2. Framework preset will auto-detect as Next.js — leave all build settings as defaults.
+3. Before clicking Deploy, add these **Environment Variables** under Settings → Environment Variables:
+
+| Variable | Value |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | `https://meixaqauldeotvtjkijc.supabase.co` |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Get this from Supabase Dashboard → Project Settings → API → `anon` key |
+
+4. Deploy. The application form will now save real submissions to Supabase.
+
+To verify it's working after deploy: submit a test application, then open the Supabase dashboard → Table Editor → `applications` table. You should see the row with the reference number shown on screen.
+
 ## Running locally
 
 ```bash
