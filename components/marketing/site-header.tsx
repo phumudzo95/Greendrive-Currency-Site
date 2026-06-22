@@ -5,6 +5,7 @@ const NAV_LINKS = [
   { href: "/#drivers", label: "For drivers" },
   { href: "/#business", label: "For business" },
   { href: "/#faqs", label: "FAQs" },
+  { href: "/competition", label: "Competition" },
 ];
 
 export function SiteHeader() {
