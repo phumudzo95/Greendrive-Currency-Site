@@ -14,7 +14,7 @@ export default function AdminLoginPage() {
     if (!correct) { setError("Admin password not configured."); return; }
     if (pw === correct) {
       localStorage.setItem("gdc_admin", "1");
-      router.replace("/admin");
+      router.replace("/admin/");
     } else {
       setError("Incorrect password.");
       setPw("");
