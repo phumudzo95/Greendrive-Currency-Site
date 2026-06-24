@@ -49,6 +49,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <nav className="flex-1 py-4 px-3 space-y-0.5">
           <NavItem href="/admin/" exact label="Dashboard" icon="grid" />
           <NavItem href="/admin/competition/" label="Competition" icon="star" />
+          <NavItem href="/admin/bulk-email/" label="Bulk Email" icon="mail" />
         </nav>
         <div className="p-3 border-t border-gray-200 space-y-1">
           <Link href="/" className="flex items-center gap-2 px-3 py-2 rounded-lg text-[13px] text-gray-500 hover:bg-gray-50">
@@ -105,6 +106,7 @@ function Icon({ name }: { name: string }) {
   const icons: Record<string, string> = {
     grid: "M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z",
     star: "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z",
+    mail: "M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zM22 6l-10 7L2 6",
   };
   return (
     <svg className="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

@@ -39,9 +39,11 @@ export default function DJCompetitionPage() {
     const idNumber = (fd.get("id_number") as string).trim();
     const cellphone = (fd.get("cellphone") as string).trim();
     const city = fd.get("city") as string;
+    const email = (fd.get("email") as string).trim();
     const file = fileRef.current?.files?.[0];
 
     if (!fullName || !idNumber || !cellphone || !city) { setErrorMsg("Please complete all required fields."); return; }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { setErrorMsg("Please enter a valid email address."); return; }
     if (!/^\d{13}$/.test(idNumber)) { setErrorMsg("ID number must be exactly 13 digits."); return; }
     if (!/^(\+27|0)[6-8][0-9]{8}$/.test(cellphone.replace(/\s/g,""))) { setErrorMsg("Please enter a valid South African cellphone number."); return; }
     if (!file) { setErrorMsg("Please upload your 40-second video."); return; }
@@ -70,7 +72,7 @@ export default function DJCompetitionPage() {
         cellphone: cellphone.replace(/\s/g,""), city, province: "Limpopo",
         instagram_handle: (fd.get("instagram_handle") as string).trim() || null,
         tiktok_handle: (fd.get("tiktok_handle") as string).trim() || null,
-        video_url: urlData.publicUrl, competition_slug: "future-queens-2026",
+        video_url: urlData.publicUrl, email, competition_slug: "future-queens-2026",
       });
       if (dbErr) throw new Error("Failed to save: " + dbErr.message);
       setProgress(100); setStatus("success"); form.reset(); setVideoSize(null);
@@ -213,6 +215,9 @@ export default function DJCompetitionPage() {
                 </Field>
                 <Field label="TikTok Handle">
                   <input name="tiktok_handle" className={fi} placeholder="@yourusername" />
+                </Field>
+                <Field label="Email Address *">
+                  <input name="email" className={fi} type="email" placeholder="e.g. nomsa@gmail.com" required />
                 </Field>
               </div>
 

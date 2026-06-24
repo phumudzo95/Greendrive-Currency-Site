@@ -13,6 +13,7 @@ type Entry = {
   originality_score: number | null; song_connection_score: number | null;
   total_score: number | null; judge_notes: string | null; created_at: string;
   competition_slug: string | null; proof_of_payment_url: string | null;
+  email: string | null;
 };
 
 type View = "grid" | "review" | "leaderboard";
@@ -147,6 +148,7 @@ export default function AdminCompetitionPage() {
       "Status":e.status,"Vocal":e.vocal_ability_score??"","Stage":e.stage_presence_score??"",
       "Originality":e.originality_score??"","Song Connection":e.song_connection_score??"",
       "Total Score":e.total_score??"","Notes":e.judge_notes??"",
+      "Email":e.email??"",
       "Proof of Payment":e.proof_of_payment_url??"",
       "Submitted":new Date(e.created_at).toLocaleDateString("en-ZA"),
     }));
@@ -176,6 +178,10 @@ export default function AdminCompetitionPage() {
         </div>
         <div className="flex flex-wrap gap-2">
           <button onClick={()=>setView("leaderboard")} className="h-9 px-4 rounded-lg border border-gray-200 text-[13px] font-semibold text-gray-700 hover:bg-gray-50">🏆 Top 10</button>
+          <Link href="/admin/bulk-email/" className="h-9 px-4 rounded-lg bg-gray-900 text-white text-[13px] font-semibold hover:bg-gray-800 flex items-center gap-1.5">
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Bulk Email
+          </Link>
           <button onClick={()=>exportCSV(filtered)} className="h-9 px-4 rounded-lg border border-gray-200 text-[13px] font-semibold text-gray-700 hover:bg-gray-50">CSV</button>
           <button onClick={()=>exportExcel(filtered)} className="h-9 px-4 rounded-lg border border-gray-200 text-[13px] font-semibold text-gray-700 hover:bg-gray-50">Excel</button>
           <Link href="/admin/" className="h-9 px-4 rounded-lg border border-gray-200 text-[13px] font-semibold text-gray-700 hover:bg-gray-50">← Dashboard</Link>
@@ -297,6 +303,7 @@ export default function AdminCompetitionPage() {
             <div className="grid grid-cols-2 gap-3 text-[13px] text-gray-600">
               <div><span className="font-semibold text-gray-800">ID Number</span><br/>{draft.id_number}</div>
               <div><span className="font-semibold text-gray-800">Cellphone</span><br/>{draft.cellphone}</div>
+              {draft.email&&<div className="col-span-2"><span className="font-semibold text-gray-800">Email</span><br/>{draft.email}</div>}
               {draft.instagram_handle&&<div><span className="font-semibold text-gray-800">Instagram</span><br/>{draft.instagram_handle}</div>}
               {draft.tiktok_handle&&<div><span className="font-semibold text-gray-800">TikTok</span><br/>{draft.tiktok_handle}</div>}
               <div><span className="font-semibold text-gray-800">Submitted</span><br/>{new Date(draft.created_at).toLocaleDateString("en-ZA")}</div>

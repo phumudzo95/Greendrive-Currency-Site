@@ -49,6 +49,7 @@ export default function CompetitionPage() {
     const province = data.get("province") as string;
     const instagram = (data.get("instagram_handle") as string).trim();
     const tiktok = (data.get("tiktok_handle") as string).trim();
+    const email = (data.get("email") as string).trim();
     const file = fileRef.current?.files?.[0];
     const proofFile = proofRef.current?.files?.[0];
     const over18 = data.get("over18");
@@ -73,6 +74,9 @@ export default function CompetitionPage() {
     }
     if (proofFile && proofFile.size > MAX_PROOF_BYTES) {
       setErrorMsg(`Proof of payment must be under ${MAX_PROOF_MB}MB.`); return;
+    }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setErrorMsg("Please enter a valid email address."); return;
     }
     if (!over18) { setErrorMsg("You must confirm you are 18 years or older."); return; }
     if (!terms) { setErrorMsg("You must accept the terms and conditions."); return; }
@@ -129,6 +133,7 @@ export default function CompetitionPage() {
         tiktok_handle: tiktok || null,
         video_url: urlData.publicUrl,
         proof_of_payment_url: proofUrl,
+        email,
         competition_slug: "likompo-2026",
       });
       if (dbError) throw new Error("Failed to save entry: " + dbError.message);
@@ -222,6 +227,9 @@ export default function CompetitionPage() {
                 </Field>
                 <Field label="TikTok Handle">
                   <input name="tiktok_handle" className={inp} placeholder="@yourusername" />
+                </Field>
+                <Field label="Email Address *">
+                  <input name="email" className={inp} type="email" placeholder="e.g. nomsa@gmail.com" required />
                 </Field>
               </div>
 
