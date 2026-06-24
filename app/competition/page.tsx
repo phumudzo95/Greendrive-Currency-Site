@@ -253,24 +253,12 @@ export default function CompetitionPage() {
                 <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 flex items-start gap-3">
                   <svg className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
                   <div>
-                    <p className="text-[13px] font-semibold text-amber-800 mb-0.5">Video too large? Compress it for free</p>
-                    <p className="text-[12.5px] text-amber-700 mb-1.5">Your video must be under {MAX_VIDEO_MB}MB. Use one of these free tools to reduce the file size:</p>
-                    <div className="flex flex-wrap gap-2">
-                      <a href="https://www.freeconvert.com/video-compressor" target="_blank" rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-[12px] font-semibold text-amber-800 underline hover:text-amber-900">
-                        FreeConvert ↗
-                      </a>
-                      <span className="text-amber-400">·</span>
-                      <a href="https://www.veed.io/tools/video-compressor" target="_blank" rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-[12px] font-semibold text-amber-800 underline hover:text-amber-900">
-                        VEED.io ↗
-                      </a>
-                      <span className="text-amber-400">·</span>
-                      <a href="https://clideo.com/compress-video" target="_blank" rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-[12px] font-semibold text-amber-800 underline hover:text-amber-900">
-                        Clideo ↗
-                      </a>
-                    </div>
+                    <p className="text-[13px] font-semibold text-amber-800 mb-0.5">Video too large?</p>
+                    <p className="text-[12.5px] text-amber-700 mb-2">Compress it for free at FreeConvert — no account needed.</p>
+                    <a href="https://www.freeconvert.com/video-compressor" target="_blank" rel="noopener noreferrer"
+                      className="inline-block text-[12px] font-semibold px-3 py-1.5 rounded-lg bg-amber-100 text-amber-800 hover:bg-amber-200 transition-colors">
+                      Open FreeConvert
+                    </a>
                   </div>
                 </div>
               </div>
