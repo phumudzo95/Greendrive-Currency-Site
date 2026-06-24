@@ -10,7 +10,12 @@ const PROVINCES = [
   "Free State","Limpopo","Mpumalanga","North West","Northern Cape",
 ];
 
-function getSupabase() {
+const MAX_VIDEO_MB = 2;
+const MAX_VIDEO_BYTES = MAX_VIDEO_MB * 1024 * 1024;
+const MAX_PROOF_MB = 5;
+const MAX_PROOF_BYTES = MAX_PROOF_MB * 1024 * 1024;
+
+function sb() {
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -21,7 +26,15 @@ export default function CompetitionPage() {
   const [status, setStatus] = useState<"idle"|"uploading"|"success"|"error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const [progress, setProgress] = useState(0);
+  const [videoSize, setVideoSize] = useState<number | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const proofRef = useRef<HTMLInputElement>(null);
+
+  function handleVideoChange() {
+    const file = fileRef.current?.files?.[0];
+    setVideoSize(file ? file.size : null);
+    setErrorMsg("");
+  }
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -37,6 +50,7 @@ export default function CompetitionPage() {
     const instagram = (data.get("instagram_handle") as string).trim();
     const tiktok = (data.get("tiktok_handle") as string).trim();
     const file = fileRef.current?.files?.[0];
+    const proofFile = proofRef.current?.files?.[0];
     const over18 = data.get("over18");
     const terms = data.get("terms");
 
@@ -50,12 +64,15 @@ export default function CompetitionPage() {
       setErrorMsg("Please enter a valid South African cellphone number."); return;
     }
     if (!file) { setErrorMsg("Please upload your 40-second video."); return; }
-    const allowed = ["video/mp4","video/quicktime","video/webm"];
-    if (!allowed.includes(file.type)) {
+    const allowedVideo = ["video/mp4","video/quicktime","video/webm"];
+    if (!allowedVideo.includes(file.type)) {
       setErrorMsg("Accepted video formats: MP4, MOV, WEBM."); return;
     }
-    if (file.size > 100 * 1024 * 1024) {
-      setErrorMsg("Video must be under 100MB."); return;
+    if (file.size > MAX_VIDEO_BYTES) {
+      setErrorMsg(`Video must be under ${MAX_VIDEO_MB}MB. Please compress your video first using the link below.`); return;
+    }
+    if (proofFile && proofFile.size > MAX_PROOF_BYTES) {
+      setErrorMsg(`Proof of payment must be under ${MAX_PROOF_MB}MB.`); return;
     }
     if (!over18) { setErrorMsg("You must confirm you are 18 years or older."); return; }
     if (!terms) { setErrorMsg("You must accept the terms and conditions."); return; }
@@ -64,12 +81,13 @@ export default function CompetitionPage() {
     setProgress(10);
 
     try {
-      const supabase = getSupabase();
-      // Check for duplicate ID number
+      const supabase = sb();
+
       const { data: existing } = await supabase
         .from("competition_entries")
         .select("id")
         .eq("id_number", idNumber)
+        .eq("competition_slug", "likompo-2026")
         .maybeSingle();
       if (existing) {
         setStatus("error");
@@ -77,19 +95,29 @@ export default function CompetitionPage() {
         return;
       }
 
-      setProgress(30);
+      setProgress(25);
       const ext = file.name.split(".").pop();
-      const filename = `${Date.now()}_${idNumber}.${ext}`;
+      const filename = `likompo/${Date.now()}_${idNumber}.${ext}`;
       const { error: uploadError } = await supabase.storage
         .from("competition-videos")
         .upload(filename, file, { contentType: file.type, upsert: false });
-
       if (uploadError) throw new Error("Video upload failed: " + uploadError.message);
-      setProgress(70);
+      setProgress(55);
 
-      const { data: urlData } = supabase.storage
-        .from("competition-videos")
-        .getPublicUrl(filename);
+      const { data: urlData } = supabase.storage.from("competition-videos").getPublicUrl(filename);
+
+      let proofUrl: string | null = null;
+      if (proofFile) {
+        const proofExt = proofFile.name.split(".").pop();
+        const proofFilename = `likompo/proof/${Date.now()}_${idNumber}.${proofExt}`;
+        const { error: proofErr } = await supabase.storage
+          .from("competition-videos")
+          .upload(proofFilename, proofFile, { contentType: proofFile.type, upsert: false });
+        if (proofErr) throw new Error("Proof of payment upload failed: " + proofErr.message);
+        const { data: proofUrlData } = supabase.storage.from("competition-videos").getPublicUrl(proofFilename);
+        proofUrl = proofUrlData.publicUrl;
+      }
+      setProgress(80);
 
       const { error: dbError } = await supabase.from("competition_entries").insert({
         full_name: fullName,
@@ -100,23 +128,27 @@ export default function CompetitionPage() {
         instagram_handle: instagram || null,
         tiktok_handle: tiktok || null,
         video_url: urlData.publicUrl,
+        proof_of_payment_url: proofUrl,
+        competition_slug: "likompo-2026",
       });
-
       if (dbError) throw new Error("Failed to save entry: " + dbError.message);
+
       setProgress(100);
       setStatus("success");
       form.reset();
+      setVideoSize(null);
     } catch (err: unknown) {
       setStatus("error");
       setErrorMsg(err instanceof Error ? err.message : "Something went wrong. Please try again.");
     }
   }
 
+  const videoTooLarge = videoSize !== null && videoSize > MAX_VIDEO_BYTES;
+
   return (
     <>
       <SiteHeader />
       <main className="flex-1 bg-gd-cream">
-        {/* Hero */}
         <section className="bg-gd-black text-white py-16 px-5 text-center">
           <p className="text-[11px] font-bold tracking-[0.18em] uppercase text-gd-accent mb-3">
             Presented by Janesh the Vocalist · GreenDrive Currency · Londo VIP Protection
@@ -130,7 +162,6 @@ export default function CompetitionPage() {
           </p>
         </section>
 
-        {/* Requirements */}
         <section className="max-w-2xl mx-auto px-5 py-10">
           <div className="bg-white border border-gd-line rounded-xl p-6 mb-8">
             <h2 className="text-[15px] font-bold text-gd-black mb-4">Entry Requirements</h2>
@@ -151,7 +182,6 @@ export default function CompetitionPage() {
             </ul>
           </div>
 
-          {/* Form */}
           {status === "success" ? (
             <div className="bg-white border border-gd-line rounded-xl p-10 text-center">
               <div className="w-14 h-14 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
@@ -195,8 +225,64 @@ export default function CompetitionPage() {
                 </Field>
               </div>
 
-              <Field label="Upload Your 40-Second Video * (MP4, MOV or WEBM — max 100MB)">
-                <input ref={fileRef} name="video" type="file" accept="video/mp4,video/quicktime,video/webm" className="block w-full text-[13.5px] text-gd-mute file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-[13px] file:font-semibold file:bg-gd-primary file:text-white hover:file:bg-gd-dark cursor-pointer" required />
+              {/* Video upload */}
+              <div className="space-y-2">
+                <Field label={`Upload Your 40-Second Video * (MP4, MOV or WEBM — max ${MAX_VIDEO_MB}MB)`}>
+                  <input
+                    ref={fileRef} name="video" type="file"
+                    accept="video/mp4,video/quicktime,video/webm"
+                    onChange={handleVideoChange}
+                    className="block w-full text-[13.5px] text-gd-mute file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-[13px] file:font-semibold file:bg-gd-primary file:text-white hover:file:bg-gd-dark cursor-pointer"
+                    required
+                  />
+                </Field>
+
+                {/* Live size feedback */}
+                {videoSize !== null && (
+                  <div className={`flex items-center gap-2 text-[12.5px] rounded-lg px-3 py-2 ${videoTooLarge ? "bg-red-50 border border-red-200 text-red-700" : "bg-green-50 border border-green-200 text-green-700"}`}>
+                    <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      {videoTooLarge ? <><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></> : <path d="M20 6L9 17l-5-5"/>}
+                    </svg>
+                    {videoTooLarge
+                      ? `File is ${(videoSize / 1024 / 1024).toFixed(1)}MB — too large. Maximum is ${MAX_VIDEO_MB}MB.`
+                      : `File size: ${(videoSize / 1024 / 1024).toFixed(1)}MB ✓`}
+                  </div>
+                )}
+
+                {/* Compress link — always visible */}
+                <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 flex items-start gap-3">
+                  <svg className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+                  <div>
+                    <p className="text-[13px] font-semibold text-amber-800 mb-0.5">Video too large? Compress it for free</p>
+                    <p className="text-[12.5px] text-amber-700 mb-1.5">Your video must be under {MAX_VIDEO_MB}MB. Use one of these free tools to reduce the file size:</p>
+                    <div className="flex flex-wrap gap-2">
+                      <a href="https://www.freeconvert.com/video-compressor" target="_blank" rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-[12px] font-semibold text-amber-800 underline hover:text-amber-900">
+                        FreeConvert ↗
+                      </a>
+                      <span className="text-amber-400">·</span>
+                      <a href="https://www.veed.io/tools/video-compressor" target="_blank" rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-[12px] font-semibold text-amber-800 underline hover:text-amber-900">
+                        VEED.io ↗
+                      </a>
+                      <span className="text-amber-400">·</span>
+                      <a href="https://clideo.com/compress-video" target="_blank" rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-[12px] font-semibold text-amber-800 underline hover:text-amber-900">
+                        Clideo ↗
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Proof of payment */}
+              <Field label={`Proof of Payment (optional — JPG, PNG or PDF, max ${MAX_PROOF_MB}MB)`}>
+                <input
+                  ref={proofRef} name="proof_of_payment" type="file"
+                  accept="image/jpeg,image/png,image/webp,application/pdf"
+                  className="block w-full text-[13.5px] text-gd-mute file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-[13px] file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer"
+                />
+                <p className="text-[12px] text-gd-mute mt-1">Upload your proof of payment if one is required for this entry.</p>
               </Field>
 
               {status === "uploading" && (
@@ -221,7 +307,7 @@ export default function CompetitionPage() {
 
               <button
                 type="submit"
-                disabled={status === "uploading"}
+                disabled={status === "uploading" || videoTooLarge}
                 className="w-full h-12 rounded-xl bg-gd-primary text-white font-bold text-[15px] hover:bg-gd-dark transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {status === "uploading" ? "Submitting…" : "Submit My Entry"}

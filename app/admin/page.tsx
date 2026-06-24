@@ -133,6 +133,13 @@ export default function AdminDashboardPage() {
             </div>
           </Link>
 
+          <Link href="/dj-competition" target="_blank"
+            className="group bg-white border border-gray-200 rounded-2xl p-5 hover:border-purple-400/40 hover:shadow-sm transition-all">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4" style={{background:"rgba(124,58,237,0.1)"}}>🎧</div>
+            <div className="text-[15px] font-bold text-gray-900 mb-1">Future Queens Entry</div>
+            <div className="text-[12.5px] text-gray-500">DJ training competition form</div>
+            <div className="mt-4 text-[13px] font-semibold text-purple-600">View live page ↗</div>
+          </Link>
           <Link href="/competition" target="_blank"
             className="group bg-white border border-gray-200 rounded-2xl p-5 hover:border-gd-primary/40 hover:shadow-sm transition-all">
             <div className="w-10 h-10 rounded-xl bg-gd-primary/10 flex items-center justify-center mb-4">
@@ -179,7 +186,14 @@ export default function AdminDashboardPage() {
             <div className="py-14 text-center">
               <p className="text-[15px] font-semibold text-gray-400">No entries yet</p>
               <p className="text-[13px] text-gray-400 mt-1">
-                Share the <Link href="/competition" target="_blank" className="text-gd-primary underline">entry form</Link> to start receiving submissions.
+                Share the <Link href="/dj-competition" target="_blank"
+            className="group bg-white border border-gray-200 rounded-2xl p-5 hover:border-purple-400/40 hover:shadow-sm transition-all">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4" style={{background:"rgba(124,58,237,0.1)"}}>🎧</div>
+            <div className="text-[15px] font-bold text-gray-900 mb-1">Future Queens Entry</div>
+            <div className="text-[12.5px] text-gray-500">DJ training competition form</div>
+            <div className="mt-4 text-[13px] font-semibold text-purple-600">View live page ↗</div>
+          </Link>
+          <Link href="/competition" target="_blank" className="text-gd-primary underline">entry form</Link> to start receiving submissions.
               </p>
             </div>
           ) : (

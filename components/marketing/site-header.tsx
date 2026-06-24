@@ -5,7 +5,8 @@ const NAV_LINKS = [
   { href: "/#drivers", label: "For drivers" },
   { href: "/#business", label: "For business" },
   { href: "/#faqs", label: "FAQs" },
-  { href: "/competition", label: "Competition" },
+  { href: "/competition", label: "Likompo 2026" },
+  { href: "/dj-competition", label: "Future Queens 🎧" },
 ];
 
 export function SiteHeader() {
